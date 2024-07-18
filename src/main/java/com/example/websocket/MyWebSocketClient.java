@@ -1,49 +1,67 @@
 package com.example.websocket;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.socket.WebSocketHandler;
+
+import org.springframework.stereotype.Component;
+import org.springframework.web.socket.CloseStatus;
+import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketHttpHeaders;
+import org.springframework.web.socket.WebSocketMessage;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.client.WebSocketClient;
+import org.springframework.web.socket.handler.TextWebSocketHandler;
+
+import javax.annotation.PostConstruct;
 import java.net.URI;
+import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 
-public class MyWebSocketClient implements WebSocketClient {
+@Component
+public class MyWebSocketClient extends TextWebSocketHandler {
 
-    public MyWebSocketClient(URI serverUri, Map<String, String> headers) {
-        super();
+    private final WebSocketClient webSocketClient;
+
+    public MyWebSocketClient(WebSocketClient webSocketClient) {
+        this.webSocketClient = webSocketClient;
+    }
+
+    @PostConstruct
+    public void connect() {
+        try {
+            // Replace with your WebSocket API URL and API key
+            String apiUrl = "wss://trade.cex.io/api/spot/ws-public";
+            String apiKey = "your_api_key_here";
+
+            // Set headers
+            WebSocketHttpHeaders headers = new WebSocketHttpHeaders();
+            headers.add("Authorization", "Bearer " + apiKey);
+            webSocketClient.doHandshake(this, headers, URI.create(apiUrl)).get();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
-    public void onOpen(ServerHandshake handshakedata) {
-        System.out.println("Opened connection");
-        // Send initial message if needed
-        String initialMessage = "{\"e\":\"get_candles\",\"oid\":\"initial_request\",\"ok\":\"ok\",\"data\":{\"pair\":\"BTC-USD\",\"fromISO\":1721211290591,\"limit\":1,\"dataType\":\"bestAsk\",\"resolution\":\"1h\"}}";
-        send(initialMessage);
+    public void afterConnectionEstablished(WebSocketSession session) throws Exception {
+        System.out.println("Connected to WebSocket server");
     }
 
     @Override
-    public void onMessage(String message) {
-        System.out.println("Received message: " + message);
+    protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
+        System.out.println("Received message: " + message.getPayload());
+
+        if (message.getPayload().contains("ping")) {
+            session.sendMessage(new TextMessage("{\n" +
+                    "  \"e\": \"pong\"\n" +
+                    "}"));
+        }
     }
 
     @Override
-    public void onClose(int code, String reason, boolean remote) {
-        System.out.println("Closed connection with exit code " + code + " additional info: " + reason);
+    public void handleTransportError(WebSocketSession session, Throwable exception) throws Exception {
+        System.err.println("Transport error: " + exception.getMessage());
     }
 
     @Override
-    public void onError(Exception ex) {
-        System.err.println("An error occurred:" + ex.getMessage());
-    }
-
-    @Override
-    public CompletableFuture<WebSocketSession> execute(WebSocketHandler webSocketHandler, String uriTemplate, Object... uriVariables) {
-        return null;
-    }
-
-    @Override
-    public CompletableFuture<WebSocketSession> execute(WebSocketHandler webSocketHandler, WebSocketHttpHeaders headers, URI uri) {
-        return null;
+    public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
+        System.out.println("Connection closed: " + status);
     }
 }
