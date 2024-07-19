@@ -28,7 +28,7 @@ public class MyWebSocketClient extends TextWebSocketHandler {
         try {
             // Replace with your WebSocket API URL and API key
             String apiUrl = "wss://trade.cex.io/api/spot/ws-public";
-            String apiKey = "your_api_key_here";
+            String apiKey = "Cb01cd51784b2b423684a982284b9372e63c8375f6982861bad84c522360c230";
 
             // Set headers
             WebSocketHttpHeaders headers = new WebSocketHttpHeaders();
