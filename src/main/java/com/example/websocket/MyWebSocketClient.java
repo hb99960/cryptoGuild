@@ -29,7 +29,8 @@ public class MyWebSocketClient extends TextWebSocketHandler {
         this.webSocketClient = webSocketClient;
     }
 
-    @PostConstruct
+
+
     public void connect() {
         try {
             // Replace with your WebSocket API URL and API key
@@ -44,7 +45,7 @@ public class MyWebSocketClient extends TextWebSocketHandler {
             headers.add("Authorization", "Bearer " + apiKey);
             webSocketClient.doHandshake(this, headers, URI.create(apiUrl)).get();
         } catch (Exception e) {
-            e.printStackTrace(  );
+            e.printStackTrace();
         }
     }
 
@@ -104,7 +105,7 @@ public class MyWebSocketClient extends TextWebSocketHandler {
             // Get the time in milliseconds
             timestampInMilliseconds = date.getTime();
             System.out.println("Timestamp in Milliseconds: " + timestampInMilliseconds);
-            
+
         } catch (ParseException e) {
             e.printStackTrace();
         }
