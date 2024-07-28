@@ -91,6 +91,12 @@ public class BitmexWebSocketClient extends TextWebSocketHandler {
         // Subscribe to a topic
         sendSubscriptionMessage("subscribe", "trade:XBTUSD");
 
+//        XBTUSD: Bitcoin to US Dollar
+//        ETHUSD: Ethereum to US Dollar
+//        XRPUSD: Ripple to US Dollar
+//        LTCUSD: Litecoin to US Dollar
+//        BCHUSD: Bitcoin Cash to US Dollar
+
         // Schedule periodic heartbeat to keep connection alive
         scheduler.scheduleAtFixedRate(this::sendPingMessage, 0, 5, TimeUnit.MINUTES);
     }
@@ -118,7 +124,7 @@ public class BitmexWebSocketClient extends TextWebSocketHandler {
 
     @Override
     protected void handleTextMessage(WebSocketSession session, TextMessage message) throws JsonProcessingException {
-        //System.out.println("Received message Bitmex api: " + message.getPayload());
+        System.out.println("Received message Bitmex api: " + message.getPayload());
         // Handle incoming messages
 
        // System.out.println("Received message Bitmex api: " + message.getPayload());
