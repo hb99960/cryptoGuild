@@ -47,7 +47,7 @@ public class InfluxDbService {
 
 
         long timeStampMillis = convertToMillis(timeStamp);
-        System.out.println("Writing to Database. Measurement = price, Symbol = " + symbol + ", Price = " + price + ", Timestamp = " + timeStampMillis);
+        //System.out.println("Writing to Database. Measurement = price, Symbol = " + symbol + ", Price = " + price + ", Timestamp = " + timeStampMillis);
         Point point = Point.measurement("price")
                 .addTag("tag", symbol)
                 .addField("price", price)

@@ -21,9 +21,11 @@ import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.HexFormat;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 
 @Component
@@ -37,6 +39,7 @@ public class BitmexWebSocketClient extends TextWebSocketHandler {
     // API key and secret
     private static final String API_KEY = "D7dIIstv7H-PFJ9l8kl6K-U8";
     private static final String API_SECRET = "0ogPFtdJd1VGlfvO0zSXEFVZ9ZEomAZJ65anVCgghuAW4BGE";
+    private long startTime;
 
 
     public BitmexWebSocketClient(StandardWebSocketClient webSocketClient, InfluxDbService influxDbService) {
@@ -87,10 +90,8 @@ public class BitmexWebSocketClient extends TextWebSocketHandler {
     public void afterConnectionEstablished(WebSocketSession session) {
         System.out.println("Connected to WebSocket server");
         this.session = session;
-
         // Subscribe to a topic
         sendSubscriptionMessage("subscribe", "trade:XBTUSD");
-
 //        XBTUSD: Bitcoin to US Dollar
 //        ETHUSD: Ethereum to US Dollar
 //        XRPUSD: Ripple to US Dollar
@@ -104,6 +105,7 @@ public class BitmexWebSocketClient extends TextWebSocketHandler {
     private void sendSubscriptionMessage(String action, String topic) {
         if (session != null && session.isOpen()) {
             String message = String.format("{\"op\": \"%s\", \"args\": [\"%s\"]}", action, topic);
+            startTime = System.currentTimeMillis();
             try {
                 session.sendMessage(new TextMessage(message));
             } catch (Exception e) {
@@ -124,10 +126,13 @@ public class BitmexWebSocketClient extends TextWebSocketHandler {
 
     @Override
     protected void handleTextMessage(WebSocketSession session, TextMessage message) throws JsonProcessingException {
-        System.out.println("Received message Bitmex api: " + message.getPayload());
+        //System.out.println("Received message Bitmex api: " + message.getPayload());
+        long receiveTime = System.currentTimeMillis();
+        long latency = receiveTime - startTime;
+        //System.out.println("Latency = " + latency);
         // Handle incoming messages
 
-       // System.out.println("Received message Bitmex api: " + message.getPayload());
+//        System.out.println("Received message Bitmex api: " + message.getPayload());
         try {
             ObjectMapper objectMapper = new ObjectMapper();
             JsonNode rootNode = objectMapper.readTree(message.getPayload());
@@ -136,8 +141,8 @@ public class BitmexWebSocketClient extends TextWebSocketHandler {
             String timestamp = dataNode.path("timestamp").asText();
             double price = dataNode.path("price").asDouble();
 
-            System.out.print("Price: " + price + " ");
-            System.out.println("Timestamp: " + timestamp);
+            //System.out.print("Price: " + price + " ");
+            //System.out.println("Timestamp: " + timestamp);
             influxDbService.writeData("BTC", price, timestamp);
         } catch (Exception e) {
             e.printStackTrace();
