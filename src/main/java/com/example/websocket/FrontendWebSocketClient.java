@@ -1,5 +1,6 @@
 package com.example.websocket;
 
+import com.example.websocket.Repository.InfluxDbConfig;
 import com.influxdb.client.InfluxDBClient;
 import com.influxdb.client.InfluxDBClientFactory;
 import com.influxdb.client.QueryApi;
@@ -61,9 +62,9 @@ public class FrontendWebSocketClient extends TextWebSocketHandler {
 //        Define Flux query
         String fluxQuery = "from(bucket: \"my-bucket\")"
                 + " |> range(start: -1h)"  // You can adjust the time range
-                + " |> filter(fn: (r) => r[\"_measurement\"] == \"price\")"
+                + " |> filter(fn: (r) => r[\"_measurement\"] == \"trade\")"
                 + " |> filter(fn: (r) => r[\"_field\"] == \"price\")"
-                + " |> filter(fn: (r) => r[\"tag\"] == \"BTC\")"
+                + " |> filter(fn: (r) => r[\"tag\"] == \"XBTUSD\")"
                 + " |> aggregateWindow(every: 1m, fn: mean, createEmpty: false)"
                 + " |> yield(name: \"mean\")";
 

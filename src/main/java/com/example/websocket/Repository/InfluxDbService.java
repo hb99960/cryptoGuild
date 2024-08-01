@@ -1,12 +1,10 @@
-package com.example.websocket;
+package com.example.websocket.Repository;
 
 import com.influxdb.client.InfluxDBClientFactory;
 import com.influxdb.client.domain.WritePrecision;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Service;
 
-import java.awt.*;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
@@ -43,14 +41,20 @@ public class InfluxDbService {
         // e.g., InfluxDBClient client = InfluxDBClientFactory.create(url, token.toCharArray(), org, bucket);
     }
 
-    public void writeData(String symbol, double price, String timeStamp) {
-
+    public void writeTradeData(String timeStamp, String symbol, String side, int size, double price, String tickDirection, double grossValue, double homeNotional, double foreignNotional, String trdType) {
 
         long timeStampMillis = convertToMillis(timeStamp);
         //System.out.println("Writing to Database. Measurement = price, Symbol = " + symbol + ", Price = " + price + ", Timestamp = " + timeStampMillis);
-        Point point = Point.measurement("price")
+        Point point = Point.measurement("trade")
                 .addTag("tag", symbol)
+                .addField("side", side)
+                .addField("tickDirection", tickDirection)
+                .addField("trdType", trdType)
+                .addField("size", size)
                 .addField("price", price)
+                .addField("grossValue", grossValue)
+                .addField("homeNotional", homeNotional)
+                .addField("foreignNotional", foreignNotional)
                 .time(timeStampMillis, WritePrecision.MS);
 
         writeApi.writePoint(influxDBConfig.getBucket(), influxDBConfig.getOrg(), point);
